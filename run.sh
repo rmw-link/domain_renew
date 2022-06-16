@@ -11,5 +11,4 @@ if [ ! -f .env ]; then
 cp ../.env .
 fi
 
-
 docker run --rm -v "$PWD":/usr/src/app -w /usr/src/app php:8 php run
