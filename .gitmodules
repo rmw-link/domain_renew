@@ -1,0 +1,3 @@
+[submodule "freenom"]
+	path = freenom
+	url = git@github.com:rmw-link/freenom.git

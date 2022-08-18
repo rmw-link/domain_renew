@@ -1,0 +1,54 @@
+name: renew
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '39 20 */4 * *'
+  push:
+    branches: [ main ]
+    tags:
+      - v*
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: build
+    strategy:
+      matrix:
+        # platform: [windows-latest]
+        # platform: [macos-latest]
+        #python-version: [3.9]
+        # platform: [macos-latest,windows-latest]
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - uses: actions/cache@v3
+        if: startsWith(matrix.platform, 'ubuntu')
+        with:
+          path: |
+            docker/cache
+            rust/target
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+
+      - env:
+          KEY: ${{ secrets.KEY }}
+        run: |
+          ./run.sh
+          echo `date` > .date
+          git config --global user.email "i@rmw.link"
+          git config --global user.name "i"
+          git add -A
+          git commit -m'　'
+
+      - name: push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
